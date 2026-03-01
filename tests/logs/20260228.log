@@ -1,0 +1,32 @@
+2026-02-28 18:37:29,531 [INFO] TestRPS: Config loaded from config.json
+2026-02-28 18:37:29,532 [INFO] TestRPS: Config loaded from config.json
+2026-02-28 18:37:29,784 [INFO] TestRPS: Initializing RPS Controller with 1 units
+2026-02-28 18:37:29,785 [INFO] TestRPS: Connecting to RPS 1 on port /dev/ttyUSB0
+2026-02-28 18:37:29,794 [INFO] TestRPS: Successfully connected to RPS 1 (ID: 1)
+2026-02-28 18:37:29,810 [WARNING] TestRPS: Invalid voltage response: ERR
+2026-02-28 18:37:29,879 [ERROR] TestRPS: Error getting status for RPS 1: could not convert string to float: 'ERR'
+2026-02-28 18:37:29,880 [INFO] TestRPS: Turned OFF output for RPS 1
+2026-02-28 18:37:29,883 [INFO] TestRPS: Closed connection to RPS 1
+2026-02-28 18:37:29,884 [INFO] TestRPS: All RPS connections closed successfully
+2026-02-28 18:41:23,381 [INFO] TestRPS: Config loaded from config.json
+2026-02-28 18:41:23,382 [INFO] TestRPS: Config loaded from config.json
+2026-02-28 18:41:23,637 [INFO] TestRPS: Initializing RPS Controller with 1 units
+2026-02-28 18:41:23,637 [INFO] TestRPS: Connecting to RPS 1 on port /dev/ttyUSB0
+2026-02-28 18:41:23,647 [INFO] TestRPS: Successfully connected to RPS 1 (ID: 1)
+2026-02-28 18:41:23,662 [WARNING] TestRPS: Invalid voltage response: ERR
+2026-02-28 18:41:23,728 [ERROR] TestRPS: Error getting status for RPS 1: could not convert string to float: 'ERR'
+2026-02-28 18:41:23,729 [INFO] TestRPS: Turned OFF output for RPS 1
+2026-02-28 18:41:23,732 [INFO] TestRPS: Closed connection to RPS 1
+2026-02-28 18:41:23,733 [INFO] TestRPS: All RPS connections closed successfully
+2026-02-28 18:45:44,465 [INFO] RPS: Config loaded from config.json
+2026-02-28 18:45:44,717 [INFO] RPS: Initializing RPS Controller with 1 units
+2026-02-28 18:45:44,717 [INFO] RPS: Connecting to RPS 1 on port /dev/ttyUSB0
+2026-02-28 18:45:44,728 [INFO] RPS: Connected to RPS 1 (ID: 1)
+2026-02-28 18:45:44,729 [INFO] RPS: Set RPS 1 voltage to 5.0V
+2026-02-28 18:45:44,729 [INFO] RPS: Set RPS 1 current limit to 2.0A
+2026-02-28 18:45:44,730 [INFO] RPS: Output ON for RPS 1
+2026-02-28 18:45:45,814 [ERROR] RPS: Error getting status for RPS 1: could not convert string to float: 'ERR'
+2026-02-28 18:45:45,815 [INFO] RPS: Output OFF for RPS 1
+2026-02-28 18:45:45,816 [INFO] RPS: Output OFF for RPS 1
+2026-02-28 18:45:45,819 [INFO] RPS: Closed connection to RPS 1
+2026-02-28 18:45:45,820 [INFO] RPS: All RPS connections closed

@@ -1,0 +1,166 @@
+2026-02-25 17:03:57,364 [ERROR] TestDWINUART: Connection failed: [Errno 2] could not open port COM3: [Errno 2] No such file or directory: 'COM3'
+2026-02-25 17:05:20,657 [ERROR] TestDWINUART: Connection failed: [Errno 2] could not open port serial0: [Errno 2] No such file or directory: 'serial0'
+2026-02-25 17:06:22,101 [INFO] TestDWINUART: Connected to /dev/serial0 at 115200 baud
+2026-02-25 17:06:42,704 [INFO] TestDWINUART: UART connection closed
+2026-02-25 17:34:54,221 [INFO] TestDWINUART: Connected to /dev/serial0 at 115200 baud
+2026-02-25 17:35:11,815 [INFO] TestDWINUART: UART connection closed
+2026-02-25 18:28:58,967 [INFO] TestRPS: Config loaded from config.json
+2026-02-25 18:28:58,969 [INFO] TestRPS: Config loaded from config.json
+2026-02-25 18:30:32,173 [INFO] TestRPS: Config loaded from config.json
+2026-02-25 18:30:32,174 [INFO] TestRPS: Config loaded from config.json
+2026-02-25 18:30:32,504 [ERROR] TestRPS: Failed to initialize RPS: Could not locate a VISA implementation. Install either the IVI binary or pyvisa-py.
+2026-02-25 18:31:44,048 [INFO] TestRPS: Config loaded from config.json
+2026-02-25 18:31:44,049 [INFO] TestRPS: Config loaded from config.json
+2026-02-25 18:31:44,274 [ERROR] TestRPS: Failed to initialize RPS: Could not locate a VISA implementation. Install either the IVI binary or pyvisa-py.
+2026-02-25 18:51:16,475 [INFO] TestRPS: Config loaded from config.json
+2026-02-25 18:51:16,476 [INFO] TestRPS: Config loaded from config.json
+2026-02-25 18:51:16,735 [INFO] TestRPS: Initializing RPS Controller with 1 units
+2026-02-25 18:51:16,736 [INFO] TestRPS: Connecting to RPS 1 on port /dev/ttyUSB0
+2026-02-25 18:51:16,737 [ERROR] TestRPS: Failed to initialize RPS 1: VI_ERROR_INV_RSRC_NAME (-1073807342): Invalid resource reference specified. Parsing error.
+2026-02-25 18:51:16,738 [INFO] TestRPS: All RPS connections closed successfully
+2026-02-25 18:57:32,344 [INFO] TestRPS: Config loaded from config.json
+2026-02-25 18:57:32,345 [INFO] TestRPS: Config loaded from config.json
+2026-02-25 18:57:32,602 [INFO] TestRPS: Initializing RPS Controller with 1 units
+2026-02-25 18:57:32,602 [INFO] TestRPS: Connecting to RPS 1 on port /dev/ttyUSB0
+2026-02-25 18:57:32,603 [ERROR] TestRPS: Failed to initialize RPS 1: cannot access local variable 'instrument' where it is not associated with a value
+2026-02-25 18:57:32,603 [INFO] TestRPS: All RPS connections closed successfully
+2026-02-25 18:57:52,679 [INFO] TestRPS: Config loaded from config.json
+2026-02-25 18:57:52,680 [INFO] TestRPS: Config loaded from config.json
+2026-02-25 18:57:52,936 [INFO] TestRPS: Initializing RPS Controller with 1 units
+2026-02-25 18:57:52,937 [INFO] TestRPS: Connecting to RPS 1 on port /dev/ttyUSB0
+2026-02-25 18:57:52,938 [ERROR] TestRPS: Failed to initialize RPS 1: VI_ERROR_INV_RSRC_NAME (-1073807342): Invalid resource reference specified. Parsing error.
+2026-02-25 18:57:52,940 [INFO] TestRPS: All RPS connections closed successfully
+2026-02-25 18:58:32,664 [INFO] TestRPS: Config loaded from config.json
+2026-02-25 18:58:32,665 [INFO] TestRPS: Config loaded from config.json
+2026-02-25 18:58:32,921 [INFO] TestRPS: Initializing RPS Controller with 1 units
+2026-02-25 18:58:32,922 [INFO] TestRPS: Connecting to RPS 1 on port /dev/ttyUSB0
+2026-02-25 18:58:32,922 [ERROR] TestRPS: Failed to initialize RPS 1: VI_ERROR_INV_RSRC_NAME (-1073807342): Invalid resource reference specified. Parsing error.
+2026-02-25 18:58:32,923 [INFO] TestRPS: All RPS connections closed successfully
+2026-02-25 19:00:17,924 [INFO] TestRPS: Config loaded from config.json
+2026-02-25 19:00:17,924 [INFO] TestRPS: Config loaded from config.json
+2026-02-25 19:00:18,183 [INFO] TestRPS: Initializing RPS Controller with 1 units
+2026-02-25 19:00:18,184 [INFO] TestRPS: Connecting to RPS 1 on port /dev/ttyUSB0
+2026-02-25 19:00:18,185 [ERROR] TestRPS: Failed to initialize RPS 1: VI_ERROR_INV_RSRC_NAME (-1073807342): Invalid resource reference specified. Parsing error.
+2026-02-25 19:00:18,185 [INFO] TestRPS: All RPS connections closed successfully
+2026-02-25 19:04:06,020 [INFO] TestRPS: Config loaded from config.json
+2026-02-25 19:04:06,020 [INFO] TestRPS: Config loaded from config.json
+2026-02-25 19:04:06,279 [INFO] TestRPS: Initializing RPS Controller with 1 units
+2026-02-25 19:04:06,280 [INFO] TestRPS: Connecting to RPS 1 on port /dev/ttyUSB0
+2026-02-25 19:04:06,288 [INFO] TestRPS: Successfully connected to RPS 1 (ID: 1)
+2026-02-25 19:04:06,371 [ERROR] TestRPS: Error getting status for RPS 1: could not convert string to float: 'ERR\r\n'
+2026-02-25 19:04:06,372 [INFO] TestRPS: Turned OFF output for RPS 1
+2026-02-25 19:04:06,375 [INFO] TestRPS: Closed connection to RPS 1
+2026-02-25 19:04:06,376 [INFO] TestRPS: All RPS connections closed successfully
+2026-02-25 19:08:01,850 [INFO] TestRPS: Config loaded from config.json
+2026-02-25 19:08:01,850 [INFO] TestRPS: Config loaded from config.json
+2026-02-25 19:08:02,108 [INFO] TestRPS: Initializing RPS Controller with 1 units
+2026-02-25 19:08:02,109 [INFO] TestRPS: Connecting to RPS 1 on port /dev/ttyUSB0
+2026-02-25 19:08:02,120 [INFO] TestRPS: Successfully connected to RPS 1 (ID: 1)
+2026-02-25 19:08:02,202 [ERROR] TestRPS: Error getting status for RPS 1: could not convert string to float: 'ERR\r\n'
+2026-02-25 19:08:02,203 [INFO] TestRPS: Turned OFF output for RPS 1
+2026-02-25 19:08:02,207 [INFO] TestRPS: Closed connection to RPS 1
+2026-02-25 19:08:02,208 [INFO] TestRPS: All RPS connections closed successfully
+2026-02-25 19:08:41,533 [INFO] TestRPS: Config loaded from config.json
+2026-02-25 19:08:41,534 [INFO] TestRPS: Config loaded from config.json
+2026-02-25 19:08:41,800 [INFO] TestRPS: Initializing RPS Controller with 1 units
+2026-02-25 19:08:41,801 [INFO] TestRPS: Connecting to RPS 1 on port /dev/ttyUSB0
+2026-02-25 19:08:41,813 [INFO] TestRPS: Successfully connected to RPS 1 (ID: 1)
+2026-02-25 19:08:41,900 [ERROR] TestRPS: Error getting status for RPS 1: could not convert string to float: 'ERR\r\n'
+2026-02-25 19:08:41,900 [INFO] TestRPS: Turned OFF output for RPS 1
+2026-02-25 19:08:41,904 [INFO] TestRPS: Closed connection to RPS 1
+2026-02-25 19:08:41,905 [INFO] TestRPS: All RPS connections closed successfully
+2026-02-25 19:08:51,367 [INFO] TestRPS: Config loaded from config.json
+2026-02-25 19:08:51,367 [INFO] TestRPS: Config loaded from config.json
+2026-02-25 19:08:51,625 [INFO] TestRPS: Initializing RPS Controller with 1 units
+2026-02-25 19:08:51,625 [INFO] TestRPS: Connecting to RPS 1 on port /dev/ttyUSB0
+2026-02-25 19:08:51,637 [INFO] TestRPS: Successfully connected to RPS 1 (ID: 1)
+2026-02-25 19:08:51,721 [ERROR] TestRPS: Error getting status for RPS 1: could not convert string to float: 'ERR\r\n'
+2026-02-25 19:08:51,722 [INFO] TestRPS: Turned OFF output for RPS 1
+2026-02-25 19:08:51,724 [INFO] TestRPS: Closed connection to RPS 1
+2026-02-25 19:08:51,725 [INFO] TestRPS: All RPS connections closed successfully
+2026-02-25 19:10:26,761 [INFO] TestRPS: Config loaded from config.json
+2026-02-25 19:10:26,762 [INFO] TestRPS: Config loaded from config.json
+2026-02-25 19:10:27,023 [INFO] TestRPS: Initializing RPS Controller with 1 units
+2026-02-25 19:10:27,024 [INFO] TestRPS: Connecting to RPS 1 on port /dev/ttyUSB0
+2026-02-25 19:10:27,034 [INFO] TestRPS: Successfully connected to RPS 1 (ID: 1)
+2026-02-25 19:10:27,114 [ERROR] TestRPS: Error getting status for RPS 1: invalid literal for int() with base 10: 'OFF\r\n'
+2026-02-25 19:10:27,115 [INFO] TestRPS: Turned OFF output for RPS 1
+2026-02-25 19:10:27,119 [INFO] TestRPS: Closed connection to RPS 1
+2026-02-25 19:10:27,119 [INFO] TestRPS: All RPS connections closed successfully
+2026-02-25 19:29:56,781 [INFO] TestRPS: Config loaded from config.json
+2026-02-25 19:29:56,781 [INFO] TestRPS: Config loaded from config.json
+2026-02-25 19:29:57,038 [INFO] TestRPS: Initializing RPS Controller with 1 units
+2026-02-25 19:29:57,038 [INFO] TestRPS: Connecting to RPS 1 on port /dev/ttyUSB0
+2026-02-25 19:29:57,049 [INFO] TestRPS: Successfully connected to RPS 1 (ID: 1)
+2026-02-25 19:29:57,133 [ERROR] TestRPS: Error getting status for RPS 1: 'builtin_function_or_method' object has no attribute 'upper'
+2026-02-25 19:29:57,134 [INFO] TestRPS: Turned OFF output for RPS 1
+2026-02-25 19:29:57,136 [INFO] TestRPS: Closed connection to RPS 1
+2026-02-25 19:29:57,136 [INFO] TestRPS: All RPS connections closed successfully
+2026-02-25 19:30:19,254 [INFO] TestRPS: Config loaded from config.json
+2026-02-25 19:30:19,255 [INFO] TestRPS: Config loaded from config.json
+2026-02-25 19:30:19,528 [INFO] TestRPS: Initializing RPS Controller with 1 units
+2026-02-25 19:30:19,529 [INFO] TestRPS: Connecting to RPS 1 on port /dev/ttyUSB0
+2026-02-25 19:30:19,540 [INFO] TestRPS: Successfully connected to RPS 1 (ID: 1)
+2026-02-25 19:30:19,623 [ERROR] TestRPS: Error getting status for RPS 1: could not convert string to float: 'ERR'
+2026-02-25 19:30:19,628 [INFO] TestRPS: Turned OFF output for RPS 1
+2026-02-25 19:30:19,631 [INFO] TestRPS: Closed connection to RPS 1
+2026-02-25 19:30:19,632 [INFO] TestRPS: All RPS connections closed successfully
+2026-02-25 19:31:05,886 [INFO] TestRPS: Config loaded from config.json
+2026-02-25 19:31:05,886 [INFO] TestRPS: Config loaded from config.json
+2026-02-25 19:31:06,151 [INFO] TestRPS: Initializing RPS Controller with 1 units
+2026-02-25 19:31:06,151 [INFO] TestRPS: Connecting to RPS 1 on port /dev/ttyUSB0
+2026-02-25 19:31:06,161 [INFO] TestRPS: Successfully connected to RPS 1 (ID: 1)
+2026-02-25 19:31:06,176 [WARNING] TestRPS: Invalid voltage response: ERR
+2026-02-25 19:31:06,242 [ERROR] TestRPS: Error getting status for RPS 1: could not convert string to float: 'ERR'
+2026-02-25 19:31:06,243 [INFO] TestRPS: Turned OFF output for RPS 1
+2026-02-25 19:31:06,246 [INFO] TestRPS: Closed connection to RPS 1
+2026-02-25 19:31:06,246 [INFO] TestRPS: All RPS connections closed successfully
+2026-02-25 19:31:20,824 [INFO] TestRPS: Config loaded from config.json
+2026-02-25 19:31:20,825 [INFO] TestRPS: Config loaded from config.json
+2026-02-25 19:31:21,083 [INFO] TestRPS: Initializing RPS Controller with 1 units
+2026-02-25 19:31:21,083 [INFO] TestRPS: Connecting to RPS 1 on port /dev/ttyUSB0
+2026-02-25 19:31:21,094 [INFO] TestRPS: Successfully connected to RPS 1 (ID: 1)
+2026-02-25 19:31:21,110 [WARNING] TestRPS: Invalid voltage response: ERR
+2026-02-25 19:31:21,177 [ERROR] TestRPS: Error getting status for RPS 1: could not convert string to float: 'ERR'
+2026-02-25 19:31:21,178 [INFO] TestRPS: Turned OFF output for RPS 1
+2026-02-25 19:31:21,181 [INFO] TestRPS: Closed connection to RPS 1
+2026-02-25 19:31:21,182 [INFO] TestRPS: All RPS connections closed successfully
+2026-02-25 19:32:00,107 [INFO] TestRPS: Config loaded from config.json
+2026-02-25 19:32:00,108 [INFO] TestRPS: Config loaded from config.json
+2026-02-25 19:32:00,366 [INFO] TestRPS: Initializing RPS Controller with 1 units
+2026-02-25 19:32:00,366 [INFO] TestRPS: Connecting to RPS 1 on port /dev/ttyUSB0
+2026-02-25 19:32:00,377 [INFO] TestRPS: Successfully connected to RPS 1 (ID: 1)
+2026-02-25 19:32:00,392 [ERROR] TestRPS: Error getting status for RPS 1: 'str' object has no attribute 'type'
+2026-02-25 19:32:00,393 [INFO] TestRPS: Turned OFF output for RPS 1
+2026-02-25 19:32:00,396 [INFO] TestRPS: Closed connection to RPS 1
+2026-02-25 19:32:00,397 [INFO] TestRPS: All RPS connections closed successfully
+2026-02-25 19:32:24,618 [INFO] TestRPS: Config loaded from config.json
+2026-02-25 19:32:24,620 [INFO] TestRPS: Config loaded from config.json
+2026-02-25 19:32:24,880 [INFO] TestRPS: Initializing RPS Controller with 1 units
+2026-02-25 19:32:24,880 [INFO] TestRPS: Connecting to RPS 1 on port /dev/ttyUSB0
+2026-02-25 19:32:24,892 [INFO] TestRPS: Successfully connected to RPS 1 (ID: 1)
+2026-02-25 19:32:24,907 [WARNING] TestRPS: Invalid voltage response: ERR
+2026-02-25 19:32:24,976 [ERROR] TestRPS: Error getting status for RPS 1: could not convert string to float: 'ERR'
+2026-02-25 19:32:24,977 [INFO] TestRPS: Turned OFF output for RPS 1
+2026-02-25 19:32:24,979 [INFO] TestRPS: Closed connection to RPS 1
+2026-02-25 19:32:24,980 [INFO] TestRPS: All RPS connections closed successfully
+2026-02-25 19:32:44,984 [INFO] TestRPS: Config loaded from config.json
+2026-02-25 19:32:44,984 [INFO] TestRPS: Config loaded from config.json
+2026-02-25 19:32:45,243 [INFO] TestRPS: Initializing RPS Controller with 1 units
+2026-02-25 19:32:45,244 [INFO] TestRPS: Connecting to RPS 1 on port /dev/ttyUSB0
+2026-02-25 19:32:45,254 [INFO] TestRPS: Successfully connected to RPS 1 (ID: 1)
+2026-02-25 19:32:45,269 [WARNING] TestRPS: Invalid voltage response: ERR
+2026-02-25 19:32:45,336 [ERROR] TestRPS: Error getting status for RPS 1: could not convert string to float: 'ERR'
+2026-02-25 19:32:45,336 [INFO] TestRPS: Turned OFF output for RPS 1
+2026-02-25 19:32:45,339 [INFO] TestRPS: Closed connection to RPS 1
+2026-02-25 19:32:45,339 [INFO] TestRPS: All RPS connections closed successfully
+2026-02-25 19:33:17,848 [INFO] TestRPS: Config loaded from config.json
+2026-02-25 19:33:17,849 [INFO] TestRPS: Config loaded from config.json
+2026-02-25 19:33:18,109 [INFO] TestRPS: Initializing RPS Controller with 1 units
+2026-02-25 19:33:18,110 [INFO] TestRPS: Connecting to RPS 1 on port /dev/ttyUSB0
+2026-02-25 19:33:18,120 [INFO] TestRPS: Successfully connected to RPS 1 (ID: 1)
+2026-02-25 19:33:18,135 [WARNING] TestRPS: Invalid voltage response: ERR
+2026-02-25 19:33:18,200 [ERROR] TestRPS: Error getting status for RPS 1: could not convert string to float: 'ERR'
+2026-02-25 19:33:18,201 [INFO] TestRPS: Turned OFF output for RPS 1
+2026-02-25 19:33:18,203 [INFO] TestRPS: Closed connection to RPS 1
+2026-02-25 19:33:18,203 [INFO] TestRPS: All RPS connections closed successfully

@@ -1,0 +1,65 @@
+{
+  "serial": {
+    "port": "/dev/serial0",
+    "baudrate": 115200
+  },
+  "stepper_motors": [
+    {
+      "id": 1,
+      "name": "Motor 1",
+      "step_pin": 21,
+      "direction_pin": null,
+      "enable_pin": 17
+    },
+    {
+      "id": 2,
+      "name": "Motor 2",
+      "step_pin": 20,
+      "direction_pin": null,
+      "enable_pin": 27
+    },
+    {
+      "id": 3,
+      "name": "Motor 3",
+      "step_pin": 16,
+      "direction_pin": null,
+      "enable_pin": 23
+    },
+    {
+      "id": 4,
+      "name": "Motor 4",
+      "step_pin": 26,
+      "direction_pin": null,
+      "enable_pin": 24
+    },
+    {
+      "id": 5,
+      "name": "Motor 5",
+      "step_pin": 19,
+      "direction_pin": null,
+      "enable_pin": 25
+    },
+    {
+      "id": 6,
+      "name": "Motor 6",
+      "step_pin": 6,
+      "direction_pin": null,
+      "enable_pin": 22
+    }
+  ],
+  "RPS":[
+    {"id" : 1,
+      "name" : "RPS 1",
+      "usb_port" : "/dev/ttyUSB0"
+    },
+    {
+      "id" : 2,
+      "name" : "RPS 2",
+      "usb_port" : "/dev/ttyUSB1"
+    },
+    { "id" : 3,
+      "name" : "RPS 3",
+      "usb_port" : "/dev/ttyUSB2"
+    }
+  ]
+} 

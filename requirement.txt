@@ -1,0 +1,4 @@
+pyserial==3.5
+PyVISA==1.16.1
+RPi.GPIO==0.7.1
+typing_extensions==4.15.0

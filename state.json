@@ -1,0 +1,77 @@
+{
+    "m_1": {
+        "name": "m_1",
+        "command": "OFF",
+        "flag": "UNSET",
+        "timestamp": "",
+        "button_state": 0,
+        "value": 0
+    },
+    "m_2": {
+        "name": "m_2",
+        "command": "OFF",
+        "flag": "UNSET",
+        "timestamp": "",
+        "button_state": 0,
+        "value": 0
+    },
+    "m_3": {
+        "name": "m_3",
+        "command": "OFF",
+        "flag": "UNSET",
+        "timestamp": "",
+        "button_state": 0,
+        "value": 0
+    },
+    "m_4": {
+        "name": "m_4",
+        "command": "OFF",
+        "flag": "UNSET",
+        "timestamp": "",
+        "button_state": 0,
+        "value": 0
+    },
+    "m_5": {
+        "name": "m_5",
+        "command": "OFF",
+        "flag": "UNSET",
+        "timestamp": "",
+        "button_state": 0,
+        "value": 0
+    },
+    "m_6": {
+        "name": "m_6",
+        "command": "OFF",
+        "flag": "UNSET",
+        "timestamp": "",
+        "button_state": 0,
+        "value": 0
+    },
+    "RPS_1": {
+        "name": "RPS_1",
+        "command": "ON",
+        "flag": "UNSET",
+        "timestamp": "2026-02-28 18:23:21",
+        "volt": "",
+        "amps": ""
+    },
+    "RPS_2": {
+        "name": "RPS_2",
+        "command": "ON",
+        "flag": "UNSET",
+        "timestamp": "2026-02-28 18:23:35",
+        "volt": "",
+        "amps": ""
+    },
+    "RPS_3": {
+        "name": "RPS_3",
+        "command": "ON",
+        "flag": "UNSET",
+        "timestamp": "2026-02-28 18:23:47",
+        "volt": "",
+        "amps": ""
+    },
+    "config": {
+        "configure_steps": 0
+    }
+}
