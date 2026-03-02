@@ -1,54 +1,55 @@
 import RPi.GPIO as GPIO
 import time
+import pigpio
 from libraries.logger import get_logger
-import threading
 
 logger = get_logger("GPIO")
 
 class GPIOController:
-    def __init__(self):
-        # Use a lock to protect the underlying RPi.GPIO calls.  Although
-        # the library is mostly thread‑safe, concurrent pulses on different
-        # pins can interfere with each other; serializing the calls makes
-        # behaviour predictable when multiple stepper threads invoke the
-        # controller at once.
-        self._lock = threading.Lock()
+    def __init__(self, use_pigpio: bool = True):
+        """Initialize the GPIO controller.
+
+        By default we try to use pigpio for hardware-timed pulses. The
+        pigpio instance is stored on ``self.pi`` so that other components
+        (e.g. :class:`StepperMotor`) can access it.  If pigpio is not
+        available the class falls back to the legacy RPi.GPIO interface.
+        """
+        # allow the caller to disable pigpio in tests or on unsupported
+        # hardware
+        self.use_pigpio = use_pigpio
+
         try:
+            if self.use_pigpio:
+                # create a pigpio connection and keep it around
+                self.pi = pigpio.pi()
+            
             GPIO.setmode(GPIO.BCM)
             GPIO.setwarnings(False)
             logger.info("GPIO controller initialized")
         except Exception as e:
             logger.error(f"Failed to initialize GPIO: {e}")
+            # propagate so the application can fail fast
             raise
 
     def setup_output(self, pin):
-        with self._lock:
-            GPIO.setup(pin, GPIO.OUT)
-            GPIO.output(pin, GPIO.LOW)
+        GPIO.setup(pin, GPIO.OUT)
+        GPIO.output(pin, GPIO.LOW)
         logger.debug(f"Pin {pin} set as output")
 
     def setup_input(self, pin, pull_up_down=GPIO.PUD_UP):
-        with self._lock:
-            GPIO.setup(pin, GPIO.IN, pull_up_down=pull_up_down)
+        GPIO.setup(pin, GPIO.IN, pull_up_down=pull_up_down)
         logger.debug(f"Pin {pin} set as input")
 
     def write_pin(self, pin, state):
-        with self._lock:
-            GPIO.output(pin, state)
+        GPIO.output(pin, state)
         
     def read_pin(self, pin):
-        with self._lock:
-            return GPIO.input(pin)
+        return GPIO.input(pin)
 
     def pulse(self, pin, delay=0.001):
-        # note: keep the sleep outside of lock so we don't hold it while
-        # waiting; only guard the discrete writes so two motors don't try to
-        # flip the same pin simultaneously.
-        with self._lock:
-            GPIO.output(pin, GPIO.HIGH)
+        GPIO.output(pin, GPIO.HIGH)
         time.sleep(delay)
-        with self._lock:
-            GPIO.output(pin, GPIO.LOW)
+        GPIO.output(pin, GPIO.LOW)
 
     def cleanup(self):
         GPIO.cleanup()

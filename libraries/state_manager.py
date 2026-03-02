@@ -8,7 +8,7 @@ import time
 import threading, os
 from dataclasses import asdict
 from libraries.logger import get_logger
-from libraries.input_handler import Cmd, lock
+from libraries.input_handler import Cmd
  
 
 logger = get_logger("StateManager")
@@ -99,45 +99,56 @@ class StateManager:
     
     def load_state(self, dwin, STATE):
         """
-        Load state from file
-        
-        Args:
-            STATE: Dictionary of motor states to load into
+        Load state from file:
+        1. Restore attributes silently
+        2. Update DWIN display
+        3. Call update() to trigger system logic
         """
         try:
-
             if not os.path.exists(self.state_file):
-                logger.info("No previous state file found, starting fresh.")
+                logger.info("No previous state file found.")
                 return
 
             with open(self.state_file, "r") as f:
                 saved = json.load(f)
 
-                # hold lock while mutating STATE to avoid races with other
-                # threads (e.g. save worker or pump controller)
-                with lock:
-                    for name, data in saved.items(): # "m_1": {MotorState data}"
-                        if name in STATE:
+            # -----------------------------------
+            # Silent restore (no update yet)
+            # -----------------------------------
+            restored_data = {}  # keep copy for later update()
 
-                            # ----------------------------
-                            # Update DWIN Display
-                            # ----------------------------
-                            self._update_dwin_display(dwin, name, STATE[name]) # "m_1" , object
+            for name, data in saved.items():
+                if name in STATE:
 
-                            
-                            # Update internal state
-                            if name != "config": 
-                                if STATE[name].flag == "SET":
-                                    STATE[name].update(**data)
+                    state_obj = STATE[name]
+                    restored_data[name] = data  # save for step 3
 
-                logger.info("State loaded from file.")
-        except FileNotFoundError:
-            logger.info("No previous state file found, starting fresh.")
-        except json.JSONDecodeError as e:
-            logger.error(f"Error reading state file: {e}")
+                    for key, value in data.items():
+                        if hasattr(state_obj, key):
+                            setattr(state_obj, key, value)
+
+            logger.info("STATE restored silently.")
+
+            # -----------------------------------
+            # Sync Display
+            # -----------------------------------
+            for name, state_obj in STATE.items():
+                self._update_dwin_display(dwin, name, state_obj)
+
+            logger.info("Display synced with restored state.")
+
+            # -----------------------------------
+            # Now call update() properly
+            # -----------------------------------
+            for name, data in restored_data.items():
+                if name in STATE:
+                    STATE[name].update(**data)
+
+            logger.info("update() called for all restored states.")
+
         except Exception as e:
             logger.error(f"Error loading state: {e}")
-    
+        
     def save_state(self, STATE, dirty_flag):
         """
         Save state to file
@@ -147,16 +158,14 @@ class StateManager:
             dirty_flag: Threading event flag to clear after saving
         """
         try:
-            # serialise the state to prevent concurrent writes/updates
-            with lock:
-                with open(self.state_file, "w") as f:
-                    json.dump(
-                        {name: asdict(motor) for name, motor in STATE.items()},
-                        f,
-                        indent=4
-                    )
-                dirty_flag.clear()
+            with open(self.state_file, "w") as f:
+                json.dump(
+                    {name: asdict(motor) for name, motor in STATE.items()},
+                    f,
+                    indent=4
+                )
             logger.info("State saved to file.")
+            dirty_flag.clear()
         except Exception as e:
             logger.error(f"Error saving state: {e}")
     

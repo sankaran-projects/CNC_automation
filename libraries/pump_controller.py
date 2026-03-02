@@ -3,7 +3,7 @@ Pump and RPS (Rotary Pump System) control module
 """
 
 from libraries.logger import get_logger
-from libraries.input_handler import STATE, lock
+from libraries.input_handler import STATE 
 import time
 
 logger = get_logger("PumpController")
@@ -65,11 +65,7 @@ class PumpController:
                 return
             
             # Process and run motor
-            # simple validation and configuration lookup; lock while
-            # touching STATE to avoid a simultaneous save or other update
-            with lock:
-                value = int(state_data.get("value", 0))
-                config_steps = STATE["config"].configure_steps
+            value = int(state_data.get("value", 0))
 
             if value <= 0 or value > 1000 :
                 logger.error(f"Invalid value for {motor_name}: {value}")
@@ -77,24 +73,19 @@ class PumpController:
                 time.sleep(1)
                 self.dwin.page_switch(1) # Returning to main page
                 return
-            steps = int(config_steps) * value
+            steps = int(STATE["config"].configure_steps) * value
 
             print(f"pump controller ------ steps : {steps}")
             
-            # mark the flag while holding the state lock so that the
-            # background save worker and any other reader see a consistent
-            # picture.
-            with lock:
-                STATE[motor_name].flag = "SET"
+            STATE[motor_name].flag = "SET"
 
             stepper_obj.move_steps_async(steps, direction=True)
             
-            with lock:
-                STATE[motor_name].flag = "UNSET"
-                # saving under the same lock avoids a race where the save
-                # worker kicks off while the flag is still set.
-                self.state_manager.save_state(STATE, dirty_flag=self.dirty_flag)
 
+            STATE[motor_name].flag = "UNSET"
+
+            self.state_manager.save_state(STATE, dirty_flag=self.dirty_flag)
+            
             logger.info(f"Pump {motor_name} completed")
             
 
@@ -128,10 +119,9 @@ class PumpController:
                 
                 stepper_obj.is_moving = False
                 stepper_obj.disable()
-                with lock:
-                    if STATE[motor_name].flag == "SET":
-                        STATE[motor_name].flag = "UNSET"
-                        self.state_manager.save_state(STATE, dirty_flag=self.dirty_flag)
+                if STATE[motor_name].flag == "SET":
+                    STATE[motor_name].flag = "UNSET"
+                    self.state_manager.save_state(STATE, dirty_flag=self.dirty_flag)
                 logger.info(f"Pump {motor_name} stopped")
             
         except (ValueError, IndexError) as e:
@@ -155,6 +145,7 @@ class PumpController:
 
         try:
             if state_data.get("volt") is None or state_data.get("amps") is None:
+                print(f"inside volt and amps none ----- ")
                 logger.error(f"Voltage and current must be specified for {rps_name}")
                 self.dwin.page_switch(6)  # Switch to error page on DWIN
                 time.sleep(1)
@@ -162,17 +153,24 @@ class PumpController:
                 return
             # Extract motor index (m_1 -> 0, m_2 -> 1, etc.)
             rps_index = int(rps_name.split('_')[1]) - 1
+            rps_index += 1
+            print(f"RPS index: {rps_index}, Voltage: {state_data.get('volt')}, Current: {state_data.get('amps')}")
             if rps_index:
+                print(f"inside rps index ----- {rps_index}")
                 volt_status = self.rps_controller.set_voltage(rps_index, state_data.get("volt"))
             if volt_status:
+                print(f"Voltage set successfully for {rps_name}")
                 current_status = self.rps_controller.set_current(rps_index, state_data.get("amps"))
             if current_status:
-                with lock:
-                    STATE[rps_name].flag = "SET"
+                print(f"Current set successfully for {rps_name}")
+                STATE[rps_name].flag = "SET"
                 on_off_status = self.rps_controller.output_on(rps_index)
-                with lock:
-                    STATE[rps_name].flag = "UNSET"
-                    self.state_manager.save_state(STATE, dirty_flag=self.dirty_flag)
+                print(f"Output on status for {rps_name}: {on_off_status}")
+                STATE[rps_name].flag = "UNSET"
+                self.state_manager.save_state(STATE, dirty_flag=self.dirty_flag)
+
+            if on_off_status:
+                return True
             else:
                 return False
         
@@ -193,10 +191,10 @@ class PumpController:
         try:
             # Extract motor index (m_1 -> 0, m_2 -> 1, etc.)
             rps_index = int(rps_name.split('_')[1]) - 1
+            rps_index +=1
             self.rps_controller.output_off(rps_index)
 
-            with lock:
-                if STATE[rps_name].flag == "SET":
+            if STATE[rps_name].flag == "SET":
                     STATE[rps_name].flag = "UNSET"
                     self.state_manager.save_state(STATE, dirty_flag=self.dirty_flag)
         except Exception as e:

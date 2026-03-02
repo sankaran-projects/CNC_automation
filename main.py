@@ -105,7 +105,7 @@ class MainController:
             # Start UART listener thread
             threading.Thread(
                 target=uart_listener,
-                args=(self.dwin, self.steppers),
+                args=(self.state_manager, self.dwin, self.steppers, dirty_flag),
                 daemon=True
             ).start()
             
@@ -122,6 +122,17 @@ class MainController:
             
             # Start background state save worker
             self.state_manager.start_save_worker(STATE, dirty_flag)
+
+            self.dwin.page_switch(1)  # Switch to main page on DWIN
+            time.sleep(0.1)
+            
+
+            # Setting the Relay HIGH due to current increases while booting
+            self.gpio.set_output(20)  # Example: Set pin 20 high on startup
+            time.sleep(0.1)
+            self.gpio.write_pin(20, GPIO.HIGH)
+            time.sleep(0.1)
+
             
             logger.info("System initialized successfully")
             return True

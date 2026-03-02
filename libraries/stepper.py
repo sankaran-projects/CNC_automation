@@ -1,8 +1,10 @@
 import time
 import threading
+import pigpio
 import RPi.GPIO as GPIO
 from libraries.logger import get_logger
 from concurrent.futures import ThreadPoolExecutor
+
 
 executor = ThreadPoolExecutor(max_workers=6)
 
@@ -53,20 +55,12 @@ class StepperMotor:
             self.gpio.write_pin(self.direction_pin, GPIO.HIGH if direction else GPIO.LOW)
 
     def move_steps_async(self, steps, direction=True, speed_delay=0.001):
-        """Run ``move_steps`` on a worker thread and return immediately.
-
-        The previous implementation simply called ``move_steps`` directly,
-        which meant the caller was still blocked and the MotorProcessor's
-        thread pool never gained any benefit.  The global executor is used
-        so that each motor can be scheduled independently.  ``move_steps``
-        itself already releases the GIL during ``time.sleep`` but even so the
-        thread pool helps keep the control logic out of the calling thread.
-        """
-        # schedule the blocking work on the shared executor so that callers
-        # don't have to know about threads or futures.
-        executor.submit(self.move_steps, steps, direction, speed_delay)
+        
+            self.move_steps(steps, direction, speed_delay)
+        
+    """
     def move_steps(self, steps, direction=True, speed_delay=0.001):
-        """Move specified number of steps"""
+        #Move specified number of steps
         if not self.enabled:
             self.enable()
         
@@ -86,6 +80,46 @@ class StepperMotor:
         logger.debug(f"Motor {self.motor_id}: Move completed. Position: {self.position}")
 
         return True
+    """
+
+
+    def move_steps(self, steps, direction=True, speed_delay=0.001):
+        # ensure the motor is enabled and the direction is set before
+        # generating any pulses; this mirrors the behaviour of the legacy
+        # implementation and guarantees the driver receives an `enable`
+        # pulse if required.
+        if not self.enabled:
+            self.enable()
+
+        self.set_direction(direction)
+        self.is_moving = True
+        logger.info(f"Motor {self.motor_id}: Moving {steps} steps {'forward' if direction else 'reverse'}")
+
+        mask = 1 << self.step_pin
+        micros = int(speed_delay * 1_000_000)
+
+        pulses = []
+        for _ in range(abs(steps)):
+            if not self.is_moving:  # allow the stop() method to interrupt
+                break
+            pulses.append(pigpio.pulse(mask, 0, micros))
+            pulses.append(pigpio.pulse(0, mask, micros))
+            self.position += 1 if direction else -1
+
+        pi = self.gpio.pi
+        pi.wave_clear()
+        pi.wave_add_generic(pulses)
+        wid = pi.wave_create()
+        if wid >= 0:
+            pi.wave_send_once(wid)
+            # wait for transmission to finish or for stop
+            while pi.wave_tx_busy() and self.is_moving:
+                time.sleep(0.001)
+            pi.wave_delete(wid)
+
+        self.is_moving = False
+        self.disable()
+        logger.debug(f"Motor {self.motor_id}: Move completed. Position: {self.position}")
 
     def move_distance(self, distance_mm, direction=True, speed_delay=0.001):
         """Move specified distance in mm"""

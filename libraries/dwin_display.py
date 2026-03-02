@@ -12,7 +12,11 @@ class DwinDisplay:
         self.ser = None
         self.running = True
         self.connected = False
-        
+        # receive buffer used by read_packet; any bytes that have been read
+        # from the serial port but not yet formed into a complete DWIN packet
+        # are kept here between calls.
+        self._recv_buffer = bytearray()
+
         self.connect()
 
     def connect(self):
@@ -33,28 +37,58 @@ class DwinDisplay:
             time.sleep(0.1)
             self.ser.flush()
 
-            # switch to main page on startup
-            self.page_switch(1)
-
         except Exception as e:
             logger.error(f"Failed to connect to DWIN display: {e}")
             self.connected = False
 
     def read_packet(self):
-        """Read a complete packet from DWIN display"""
+        """Return one complete DWIN packet, if available.
+
+        This method reads all bytes currently waiting on the UART into a
+        private buffer and then attempts to parse a single packet from that
+        buffer.  If a full packet is found it is removed from the buffer and
+        returned; otherwise ``None`` is returned and the partial data is kept
+        until the next call.  The packet format is::
+
+            0x5A 0xA5 <len> <...len bytes of payload...>
+
+        where the length byte specifies the number of bytes that follow it.
+        """
         if not self.connected or not self.ser:
             return None
-            
+
         try:
-            if self.ser.in_waiting >= 9:  # Minimum packet size
-                header = self.ser.read(3)
-                if header == b'\x5A\xA5\x06':  # Standard response header
-                    data = self.ser.read(6)  # Read remaining bytes
-                    return header + data
-                else:
-                    # Try to resync
-                    self.ser.flushInput()
-            return None
+            # read any new data into the receive buffer
+            if self.ser.in_waiting:
+                self._recv_buffer.extend(self.ser.read(self.ser.in_waiting))
+
+            # need at least header
+            if len(self._recv_buffer) < 3:
+                return None
+
+            # ensure sync bytes are in place; if not search for next possible
+            # sync and discard any leading garbage
+            if self._recv_buffer[0:2] != b"\x5A\xA5":
+                idx = self._recv_buffer.find(b"\x5A\xA5", 1)
+                if idx == -1:
+                    # no sync sequence, drop everything
+                    self._recv_buffer.clear()
+                    return None
+                # drop bytes before the sync sequence
+                del self._recv_buffer[:idx]
+                if len(self._recv_buffer) < 3:
+                    return None
+
+            length = self._recv_buffer[2]
+            total_len = 3 + length
+            if len(self._recv_buffer) < total_len:
+                # wait for more bytes
+                return None
+
+            packet = bytes(self._recv_buffer[:total_len])
+            del self._recv_buffer[:total_len]
+            return packet
+
         except Exception as e:
             logger.error(f"Error reading from DWIN: {e}")
             self.reconnect()
@@ -67,6 +101,7 @@ class DwinDisplay:
             return False
             
         try:
+            logger.debug(f"Sending to DWIN: Addr=0x{address:04X}, Value={value}")
             # Format: 5A A5 len 82 addrH addrL dataH dataL
             packet = bytearray([
                 0x5A, 0xA5, 0x05, 0x82,

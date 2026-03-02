@@ -22,7 +22,7 @@ class RPSController:
         """
         self.rps_config = rps_config
         self.rps_units = {}
-        self.rm = pyvisa.ResourceManager()
+        self.rm = pyvisa.ResourceManager('@py')
         
         logger.info(f"Initializing RPS Controller with {len(rps_config)} units")
         self._initialize_rps_units()
@@ -36,14 +36,60 @@ class RPSController:
                 usb_port = rps.get("usb_port")
                 
                 logger.info(f"Connecting to {rps_name} on port {usb_port}")
-                
+
+                # Discover available VISA resources and pick the one matching usb_port
+                resources = self.rm.list_resources()
+                resource_name = None
+
+                # prepare a search key for matching resources
+                search_key = None
+                if usb_port:
+                    # strip any leading path components; we just want ttyUSBx or similar
+                    search_key = str(usb_port).split('/')[-1]
+                # default to matching any USB serial device
+                if not search_key:
+                    search_key = "ttyUSB"
+
+                # If configuration already appears to be a full VISA string, just use it
+                if usb_port and "::" in str(usb_port):
+                    resource_name = usb_port
+                else:
+                    # search the listed resources for our key substring
+                    for res in resources:
+                        if search_key in res:
+                            resource_name = res
+                            break
+                    # if still not found, as a last resort take the first ASRL resource
+                    if resource_name is None:
+                        for res in resources:
+                            if str(res).upper().startswith("ASRL"):
+                                resource_name = res
+                                break
+
+                if resource_name is None:
+                    raise RuntimeError(f"Could not find VISA resource for port {usb_port}. Available: {resources}")
+
                 # Open VISA connection
-                instrument = self.rm.open_resource(usb_port)
-                
+                instrument = self.rm.open_resource(resource_name)
+
                 print(f"------- instrument: {instrument}")
-                # Configure instrument
+                # Configure serial parameters
                 instrument.baud_rate = 115200
+                instrument.data_bits = 8
+                instrument.parity = pyvisa.constants.Parity.none
+                instrument.stop_bits = pyvisa.constants.StopBits.one
+
+                instrument.read_termination = '\n'
+                instrument.write_termination = '\n'
                 instrument.timeout = 2000
+
+                # Probe instrument identity
+                try:
+                    idn = instrument.query("*IDN?")
+                    print(f"Instrument ID: {idn}")
+                    logger.info(f"{rps_name} ({resource_name}) IDN: {idn}")
+                except Exception as idn_e:
+                    logger.warning(f"Failed to query *IDN? for {rps_name} ({resource_name}): {idn_e}")
                 
                 # Store instrument with ID as key
                 self.rps_units[rps_id] = {
@@ -110,12 +156,13 @@ class RPSController:
             bool: True if successful, False otherwise
         """
         try:
+            print("inside set voltage")
             if rps_id not in self.rps_units:
                 logger.warning(f"RPS ID {rps_id} not found")
                 return False
             
             instrument = self.rps_units[rps_id]["instrument"]
-            instrument.write(f"VSET {voltage}")
+            instrument.write(f"VOLT {voltage}")
             
             logger.info(f"Set RPS {rps_id} voltage to {voltage}V")
             return True
@@ -136,12 +183,13 @@ class RPSController:
             bool: True if successful, False otherwise
         """
         try:
+            print("inside set current")
             if rps_id not in self.rps_units:
                 logger.warning(f"RPS ID {rps_id} not found")
                 return False
             
             instrument = self.rps_units[rps_id]["instrument"]
-            instrument.write(f"ISET {current}")
+            instrument.write(f"CURR {current}")
             
             logger.info(f"Set RPS {rps_id} current limit to {current}A")
             return True
@@ -166,7 +214,7 @@ class RPSController:
                 return False
             
             instrument = self.rps_units[rps_id]["instrument"]
-            instrument.write("OUTP 1")
+            instrument.write("OUTP ON")
             
             logger.info(f"Turned ON output for RPS {rps_id}")
             return True
@@ -191,7 +239,7 @@ class RPSController:
                 return False
             
             instrument = self.rps_units[rps_id]["instrument"]
-            instrument.write("OUTP 0")
+            instrument.write("OUTP OFF")
             
             logger.info(f"Turned OFF output for RPS {rps_id}")
             return True
