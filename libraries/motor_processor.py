@@ -4,8 +4,8 @@ Handles processing of motor commands from the input queue
 """
 
 import queue
+import threading
 from libraries.logger import get_logger
-from concurrent.futures import ThreadPoolExecutor
 
 logger = get_logger("MotorProcessor")
 
@@ -25,7 +25,13 @@ class MotorProcessor:
         self.pump_controller = pump_controller
         self.dirty_flag = dirty_flag
         self.running_flag = running_flag
-        self.executor = ThreadPoolExecutor(max_workers=6)
+        
+        # Create stop events for each motor (m_1 to m_6 and RPS_1 to RPS_3)
+        self.motor_stop_events = {}
+        for i in range(1, 7):
+            self.motor_stop_events[f"m_{i}"] = threading.Event()
+        for i in range(1, 4):
+            self.motor_stop_events[f"RPS_{i}"] = threading.Event()
     
     def process_queue(self, update_queue):
         """
@@ -62,35 +68,48 @@ class MotorProcessor:
         if motor_name.startswith("m_"):
             if command == "ON":
                 logger.info(f"--> Starting {motor_name}")
-                self.executor.submit(self.pump_controller.start_pump,
-                    motor_name,
-                    state_data
-                    )
-                #self.pump_controller.start_pump(motor_name, state_data)
+                # Clear the stop event before starting
+                self.motor_stop_events[motor_name].clear()
+                # Run in thread to avoid blocking queue processor
+                t = threading.Thread(
+                    target=self.pump_controller.start_pump,
+                    args=(motor_name, state_data, self.motor_stop_events[motor_name])
+                )
+                t.start()
             elif command == "OFF":
                 logger.info(f"--> Stopping {motor_name}")
-                self.executor.submit(
-                self.pump_controller.stop_pump,
-                        motor_name
-                    )
+                # Set the stop event to signal the motor to stop
+                self.motor_stop_events[motor_name].set()
+                # Run in thread to avoid blocking queue processor
+                t = threading.Thread(
+                    target=self.pump_controller.stop_pump,
+                    args=(motor_name, self.motor_stop_events[motor_name])
+                )
+                t.start()
                 
         # Handle RPS commands (RPS_1 through RPS_3)
         elif motor_name.startswith("RPS_"):
             if command == "ON":
                 logger.info(f"--> Starting {motor_name}")
-                #self.pump_controller.start_RPS(motor_name, state_data)
-                self.executor.submit(
-                    self.pump_controller.start_RPS,
-                    motor_name,
-                    state_data
+                # Clear the stop event before starting
+                self.motor_stop_events[motor_name].clear()
+                # Run in thread to avoid blocking queue processor
+                t = threading.Thread(
+                    target=self.pump_controller.start_RPS,
+                    args=(motor_name, state_data, self.motor_stop_events[motor_name])
                 )
+                t.start()
             
             elif command == "OFF":
                 logger.info(f"--> Stopping {motor_name}")
-                self.executor.submit(
-                    self.pump_controller.stop_RPS,
-                    motor_name
+                # Set the stop event to signal the motor to stop
+                self.motor_stop_events[motor_name].set()
+                # Run in thread to avoid blocking queue processor
+                t = threading.Thread(
+                    target=self.pump_controller.stop_RPS,
+                    args=(motor_name, self.motor_stop_events[motor_name])
                 )
+                t.start()
         
         else:
             logger.warning(f"Unknown motor type: {motor_name}")

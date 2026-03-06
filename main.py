@@ -4,6 +4,7 @@ import time
 import json 
 import signal
 import sys
+import RPi.GPIO as GPIO
 
 from libraries.gpio_control import GPIOController
 from libraries.dwin_display import DwinDisplay
@@ -126,11 +127,12 @@ class MainController:
             self.dwin.page_switch(1)  # Switch to main page on DWIN
             time.sleep(0.1)
             
-
+            common_relay_pin = config.get("Common_Relay", 20)
             # Setting the Relay HIGH due to current increases while booting
-            self.gpio.set_output(20)  # Example: Set pin 20 high on startup
+            self.gpio.setup_output(common_relay_pin)  # Example: Set pin 20 high on startup
             time.sleep(0.1)
-            self.gpio.write_pin(20, GPIO.HIGH)
+            self.gpio.write_pin(common_relay_pin, GPIO.HIGH)
+            print(f"Relay pin 20 set to HIGH on startup")
             time.sleep(0.1)
 
             

@@ -1,12 +1,12 @@
 import time
-import threading
 import pigpio
+import smbus2
+import struct
 import RPi.GPIO as GPIO
 from libraries.logger import get_logger
-from concurrent.futures import ThreadPoolExecutor
 
-
-executor = ThreadPoolExecutor(max_workers=6)
+STM_I2C_ADDRESS = 0x08  # Change to your STM slave address
+bus = smbus2.SMBus(1)
 
 logger = get_logger("Stepper")
 
@@ -54,72 +54,117 @@ class StepperMotor:
         if self.direction_pin and self.gpio:
             self.gpio.write_pin(self.direction_pin, GPIO.HIGH if direction else GPIO.LOW)
 
-    def move_steps_async(self, steps, direction=True, speed_delay=0.001):
-        
-            self.move_steps(steps, direction, speed_delay)
-        
-    """
-    def move_steps(self, steps, direction=True, speed_delay=0.001):
-        #Move specified number of steps
-        if not self.enabled:
-            self.enable()
-        
-        self.set_direction(direction)
-        self.is_moving = True
-        
-        logger.info(f"Motor {self.motor_id}: Moving {steps} steps {'forward' if direction else 'reverse'}")
-        
-        for _ in range(abs(steps)):
-            if not self.is_moving:  # Allow emergency stop
-                break
-            self.gpio.pulse(self.step_pin, speed_delay)
-            self.position += 1 if direction else -1
-            
-        self.is_moving = False
-        self.disable()
-        logger.debug(f"Motor {self.motor_id}: Move completed. Position: {self.position}")
-
-        return True
-    """
-
-
-    def move_steps(self, steps, direction=True, speed_delay=0.001):
-        # ensure the motor is enabled and the direction is set before
-        # generating any pulses; this mirrors the behaviour of the legacy
-        # implementation and guarantees the driver receives an `enable`
-        # pulse if required.
-        if not self.enabled:
-            self.enable()
-
-        self.set_direction(direction)
-        self.is_moving = True
-        logger.info(f"Motor {self.motor_id}: Moving {steps} steps {'forward' if direction else 'reverse'}")
-
-        mask = 1 << self.step_pin
-        micros = int(speed_delay * 1_000_000)
-
-        pulses = []
-        for _ in range(abs(steps)):
-            if not self.is_moving:  # allow the stop() method to interrupt
-                break
-            pulses.append(pigpio.pulse(mask, 0, micros))
-            pulses.append(pigpio.pulse(0, mask, micros))
-            self.position += 1 if direction else -1
-
+    def _run_motor_pwm(self, frequency, steps, direction, stop_event=None):
+        pin = self.step_pin
         pi = self.gpio.pi
-        pi.wave_clear()
-        pi.wave_add_generic(pulses)
-        wid = pi.wave_create()
-        if wid >= 0:
-            pi.wave_send_once(wid)
-            # wait for transmission to finish or for stop
-            while pi.wave_tx_busy() and self.is_moving:
-                time.sleep(0.001)
-            pi.wave_delete(wid)
+        self.is_moving = True
+        
+        logger.info(f"Motor {self.motor_id}: Starting - {steps} steps at {frequency} Hz")
+        
+        period_micros = int(1_000_000 / frequency)
 
+        total_duration_us = steps * period_micros
+        total_duration_s = total_duration_us / 1_000_000
+        print(f"Total pulse duration: {total_duration_us/1000:.1f}ms ({total_duration_us}µs)")
+
+        try:
+            pi.hardware_PWM(pin, frequency, 500000)
+            print(f"Hardware PWM started on GPIO {pin} ({frequency} Hz, 50% duty)")
+        
+            print(f" Hardware transmitting for {total_duration_s:.4f}s...")
+            elapsed = 0
+            check_interval = 0.001  # 1ms check interval
+            last_log = 0
+            
+            while elapsed < total_duration_s:
+                if stop_event and stop_event.is_set():
+                    print(f" Stop signal received after {elapsed:.4f}s")
+                    pi.hardware_PWM(pin, frequency, 0)  # Stop PWM (0% duty)
+                    return int(steps * (elapsed / total_duration_s))
+                
+                # Log progress every 0.1s
+                if elapsed - last_log >= 0.1:
+                    percent = (elapsed / total_duration_s) * 100
+                    print(f"  {percent:.0f}% ({elapsed:.3f}s / {total_duration_s:.3f}s)")
+                    last_log = elapsed
+                
+                time.sleep(check_interval)
+                elapsed += check_interval
+            
+            # Stop the hardware PWM - set duty cycle to 0%
+            pi.hardware_PWM(pin, frequency, 0)
+            print(f" Hardware PWM complete ({total_duration_s:.4f}s elapsed)")
+            
+        
+        except (BrokenPipeError, ConnectionResetError) as e:
+            print(f" Connection error: {e}")
+            return 0
+        except Exception as e:
+            print(f" Unexpected error: {e}")
+            return 0
+        
         self.is_moving = False
         self.disable()
-        logger.debug(f"Motor {self.motor_id}: Move completed. Position: {self.position}")
+        logger.debug(f"Motor {self.motor_id}: Completed. Position: {self.position}")
+
+    def move_steps_async(self, steps, direction=True,  stop_event=None):
+        self.set_direction(direction)
+        if not self.enabled:
+            self.enable()
+        
+        frequency = int(steps / 60)  # 60 second default speed
+        self._run_motor_pwm(frequency, steps, direction, stop_event=stop_event)
+
+    def send_data_to_stm(self, ml, dispense_time_sec=60, command="ON"):
+        
+        total_steps = int(ml)
+        frequency = int(total_steps / dispense_time_sec)
+        motor_id = self.motor_id
+        command = command.upper()
+        print("Total Steps:", total_steps)
+        print("Frequency:", frequency)
+
+        # Pack into 8 bytes (big endian) - total_steps, frequency, motor_id, command
+        data = struct.pack(">IIIB", total_steps, frequency, motor_id, ord(command[0]))
+
+        # Convert to list of bytes for I2C
+        byte_list = list(data)
+
+        # Send command to STM
+        bus.write_i2c_block_data(STM_I2C_ADDRESS, 0x01, byte_list)
+        print("Command sent to STM")
+
+        # Poll for completion status
+        max_attempts = 300  # 30 seconds max (100ms * 300)
+        attempt = 0
+        
+        while attempt < max_attempts:
+            try:
+                # Read status from STM (assuming 1 byte status response)
+                status_data = bus.read_i2c_block_data(STM_I2C_ADDRESS, 0x02, 1)
+                status = status_data[0]
+                
+                print(f"Status check {attempt + 1}: {status}")
+                
+                if status == 0x01:  # Completed successfully
+                    print("STM operation completed successfully")
+                    return True
+                elif status == 0x02:  # Error
+                    print("STM operation failed with error")
+                    return False
+                elif status == 0x00:  # Still running
+                    pass  # Continue polling
+                    
+            except Exception as e:
+                print(f"Error reading status from STM: {e}")
+                return False
+            
+            time.sleep(0.1)  # Wait 100ms before next check
+            attempt += 1
+        
+        print("STM operation timed out")
+        return False
+
 
     def move_distance(self, distance_mm, direction=True, speed_delay=0.001):
         """Move specified distance in mm"""
@@ -147,6 +192,7 @@ class StepperMotor:
     def stop(self):
         """Emergency stop"""
         self.is_moving = False
+
         logger.warning(f"Motor {self.motor_id} stopped")
 
     def get_position_mm(self):

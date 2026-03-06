@@ -26,7 +26,11 @@ class DWINUARTTester:
         self.baudrate = baudrate
         self.ser = None
         self.running = False
-        
+        # buffer for accumulating raw bytes so we can split into actual DWIN
+        # packets. This mirrors the logic used in ``DwinDisplay`` and makes the
+        # report of packets consistent with what the application sees.
+        self._recv_buffer = bytearray()
+
     def connect(self):
         """Connect to DWIN display"""
         try:
@@ -75,35 +79,63 @@ class DWINUARTTester:
         except:
             pass
     
+    def _extract_packets(self):
+        """Extract complete DWIN packets from the receive buffer.
+
+        Returns a list of byte strings representing logical packets.  Any
+        partial packet remains in ``self._recv_buffer`` for the next call.
+        """
+        packets = []
+        buf = self._recv_buffer
+        while True:
+            if len(buf) < 3:
+                break
+            if buf[0:2] != b"\x5A\xA5":
+                idx = buf.find(b"\x5A\xA5", 1)
+                if idx == -1:
+                    buf.clear()
+                    break
+                del buf[:idx]
+                if len(buf) < 3:
+                    break
+            length = buf[2]
+            total = 3 + length
+            if len(buf) < total:
+                break
+            packets.append(bytes(buf[:total]))
+            del buf[:total]
+        return packets
+
     def monitor_uart(self, duration=60):
         """Monitor UART for incoming data"""
         if not self.ser or not self.running:
             print("Not connected!")
             return
-        
+
         print(f"\n{'='*70}")
         print(f"DWIN UART Monitor Started - Monitoring for {duration} seconds")
         print(f"{'='*70}\n")
-        
+
         start_time = time.time()
         packet_count = 0
         byte_count = 0
-        
+
         try:
             while self.running and (time.time() - start_time) < duration:
                 if self.ser.in_waiting > 0:
-                    # Read available data
                     data = self.ser.read(self.ser.in_waiting)
                     byte_count += len(data)
-                    packet_count += 1
-                    
-                    timestamp = datetime.now().strftime("%H:%M:%S.%f")[:-3]
-                    print(f"[{timestamp}] Packet #{packet_count} - {len(data)} bytes")
-                    self.parse_packet(data)
-                    print()
-                
-                time.sleep(0.01)  # Small delay to prevent CPU spinning
-        
+                    self._recv_buffer.extend(data)
+
+                    # extract logical packets
+                    pkts = self._extract_packets()
+                    for pkt in pkts:
+                        packet_count += 1
+                        timestamp = datetime.now().strftime("%H:%M:%S.%f")[:-3]
+                        print(f"[{timestamp}] Packet #{packet_count} - {len(pkt)} bytes")
+                        self.parse_packet(pkt)
+                time.sleep(0.01)
+
         except KeyboardInterrupt:
             print("\n\n⚠ Monitoring stopped by user")
         except Exception as e:
@@ -176,11 +208,11 @@ def main():
     
     try:
         # Optional: Send a test packet
-        # tester.send_test_packet()
+        tester.send_test_packet(address=0x3000, value=0xA040)
         # time.sleep(0.5)
         
         # Monitor for 60 seconds
-        tester.monitor_uart(duration=60)
+        #tester.monitor_uart(duration=60)
         
     except Exception as e:
         logger.error(f"Test failed: {e}")

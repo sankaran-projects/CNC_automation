@@ -7,14 +7,14 @@
     {
       "id": 1,
       "name": "Motor 1",
-      "step_pin": 21,
+      "step_pin": 12,
       "direction_pin": null,
       "enable_pin": 17
     },
     {
       "id": 2,
       "name": "Motor 2",
-      "step_pin": 20,
+      "step_pin": 13,
       "direction_pin": null,
       "enable_pin": 27
     },
@@ -61,5 +61,6 @@
       "name" : "RPS 3",
       "usb_port" : "/dev/ttyUSB2"
     }
-  ]
+  ],
+  "Common_Relay": 20
 } 

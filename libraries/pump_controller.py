@@ -40,20 +40,23 @@ class PumpController:
         self.configure_steps = configure_steps
         self.dwin = dwin
     
-    def start_pump(self, motor_name, state_data):
+    def start_pump(self, motor_name, state_data, stop_event=None):
         """
         Start a peristaltic pump motor
         
         Args:
             motor_name: Motor identifier (e.g., "m_1")
             state_data: Dictionary containing pump configuration and value
+            stop_event: Threading event to signal motor stop
         """
         print(f"Starting Pump: {motor_name}")
         logger.info(f"Starting pump: {motor_name}")
         
         try:
             # Extract motor index (m_1 -> 0, m_2 -> 1, etc.)
-            motor_index = int(motor_name.split('_')[1]) - 1
+            motor_id = int(motor_name.split('_')[1])
+
+            motor_index = motor_id - 1
             
             if not (0 <= motor_index < len(self.steppers)):
                 logger.error(f"Invalid motor index: {motor_name}")
@@ -73,20 +76,32 @@ class PumpController:
                 time.sleep(1)
                 self.dwin.page_switch(1) # Returning to main page
                 return
+            
+            # to dispense 1 ml, 3.1818 revoltion is required for S16 tube. So to calculate the steps, it is 3.1818 * 200 (steps per revolution) = 636.36 steps/ml. 
+            # So to calculate the steps for the given value in ml, it is 636.36 * value. 
+            # The configure_steps is used to adjust the steps based on the tube size and other factors.
+
+            
             steps = int(STATE["config"].configure_steps) * value
 
-            print(f"pump controller ------ steps : {steps}")
-            
-            STATE[motor_name].flag = "SET"
+            if motor_id <=2:
 
-            stepper_obj.move_steps_async(steps, direction=True)
-            
+                print(f"pump controller ------ steps : {steps}")
+                
+                STATE[motor_name].flag = "SET"
 
-            STATE[motor_name].flag = "UNSET"
+                stepper_obj.move_steps_async(steps, direction=True, stop_event=stop_event)
+                
 
-            self.state_manager.save_state(STATE, dirty_flag=self.dirty_flag)
+                STATE[motor_name].flag = "UNSET"
+
+                self.state_manager.save_state(STATE, dirty_flag=self.dirty_flag)
+                
+                logger.info(f"Pump {motor_name} completed")
             
-            logger.info(f"Pump {motor_name} completed")
+            elif motor_id > 2 and motor_id <= 6:
+
+                stepper_obj.send_data_to_stm(value, dispense_time_sec=60)
             
 
         except (ValueError, IndexError) as e:
@@ -94,12 +109,13 @@ class PumpController:
         except Exception as e:
             logger.error(f"Error starting pump {motor_name}: {e}")
     
-    def stop_pump(self, motor_name):
+    def stop_pump(self, motor_name, stop_event=None):
         """
         Stop a peristaltic pump motor
         
         Args:
             motor_name: Motor identifier (e.g., "m_1")
+            stop_event: Threading event to signal motor stop
         """
         print(f"Stopping Pump: {motor_name}")
         logger.info(f"Stopping pump: {motor_name}")
@@ -117,6 +133,10 @@ class PumpController:
             if stepper_obj and stepper_obj.is_moving:
                 print("inside is moving ")
                 
+                # Set the stop event to signal motor to stop
+                if stop_event:
+                    stop_event.set()
+                    
                 stepper_obj.is_moving = False
                 stepper_obj.disable()
                 if STATE[motor_name].flag == "SET":
@@ -129,13 +149,14 @@ class PumpController:
         except Exception as e:
             logger.error(f"Error stopping pump {motor_name}: {e}")
     
-    def start_RPS(self, rps_name, state_data):
+    def start_RPS(self, rps_name, state_data, stop_event=None):
         """
         Start RPS (Rotary Pump System)
         
         Args:
             rps_name: RPS identifier (e.g., "RPS_1")
             state_data: Dictionary containing RPS configuration
+            stop_event: Threading event to signal motor stop
         """
         print(f"Starting RPS: {rps_name}")
         logger.info(f"Starting RPS: {rps_name}")
@@ -178,12 +199,13 @@ class PumpController:
             logger.error(f"Error turning on output for RPS {rps_index}: {str(e)}")
             return False
     
-    def stop_RPS(self, rps_name):
+    def stop_RPS(self, rps_name, stop_event=None):
         """
         Stop RPS (Rotary Pump System)
         
         Args:
             rps_name: RPS identifier (e.g., "RPS_1")
+            stop_event: Threading event to signal motor stop
         """
         print(f"Stopping RPS: {rps_name}")
         logger.info(f"Stopping RPS: {rps_name}")
